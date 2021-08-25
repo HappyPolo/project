@@ -240,7 +240,7 @@ s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
 u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
 v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
-with open(path+'MCA/MCA_BIO_pickle.dat', 'wb') as f:
+with open(path+'MCA/MCA_MAM_BIO_pickle.dat', 'wb') as f:
     pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 #
 # %%
@@ -280,7 +280,7 @@ s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
 u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
 v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
-with open(path+'MCA/MCA_NIO_pickle.dat', 'wb') as f:
+with open(path+'MCA/MCA_MAM_NIO_pickle.dat', 'wb') as f:
     pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
@@ -319,7 +319,7 @@ s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
 u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
 v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
-with open(path+'MCA/MCA_TIO_pickle.dat', 'wb') as f:
+with open(path+'MCA/MCA_MAM_TIO_pickle.dat', 'wb') as f:
     pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
@@ -357,7 +357,7 @@ s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
 u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
 v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
-with open(path+'MCA/MCA_SIO1_pickle.dat', 'wb') as f:
+with open(path+'MCA/MCA_MAM_SIO1_pickle.dat', 'wb') as f:
     pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
@@ -395,7 +395,7 @@ s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
 u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
 v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
-with open(path+'MCA/MCA_SIO2_pickle.dat', 'wb') as f:
+with open(path+'MCA/MCA_MAM_SIO2_pickle.dat', 'wb') as f:
     pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
@@ -434,7 +434,7 @@ s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
 u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
 v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
-with open(path+'MCA/MCA_SIO3_pickle.dat', 'wb') as f:
+with open(path+'MCA/MCA_MAM_SIO3_pickle.dat', 'wb') as f:
     pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
