@@ -135,7 +135,9 @@ def selMon(da, Mon):
 
 
 def lsmask(ds, lsdir, label='ocean'):
-    landsea = filplonlat(xr.open_dataset(lsdir)['mask'][0])
+    with xr.open_dataset(lsdir) as f:
+        ds = f['mask'][0]
+    landsea = filplonlat(ds)
     ds.coords['mask'] = (('lat', 'lon'), landsea.values)
     if label == 'land':
         ds = ds.where(ds.mask < 1)

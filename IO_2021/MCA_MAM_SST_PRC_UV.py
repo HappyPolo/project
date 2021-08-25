@@ -15,7 +15,7 @@
 Author       : ChenKt
 Date         : 2021-08-24 21:14:02
 LastEditors  : ChenKt
-LastEditTime : 2021-08-25 10:14:02
+LastEditTime : 2021-08-25 19:34:50
 FilePath     : /kt/project/IO_2021/MCA_SST_PRC_UV.py
 Aim          : 对春季IO(BIO/NIO/SIO) SST 与 降水/风场进行MCA，并保存数据
 Mission      : 
@@ -23,7 +23,6 @@ Mission      :
   2.进行MCA计算，并使得对应模态同号，保存数据
   3.区域依次进行
 '''
-# %%
 # %%
 
 
@@ -112,7 +111,9 @@ def selMon(da, Mon):
 
 
 def lsmask(ds, lsdir, label='ocean'):
-    landsea = filplonlat(xr.open_dataset(lsdir)['mask'][0])
+    with xr.open_dataset(lsdir) as f:
+        ds = f['mask'][0]
+    landsea = filplonlat(ds)
     ds.coords['mask'] = (('lat', 'lon'), landsea.values)
     if label == 'land':
         ds = ds.where(ds.mask < 1)
