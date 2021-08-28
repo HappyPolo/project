@@ -34,135 +34,135 @@ import pickle
 from xMCA import xMCA
 import matplotlib.pyplot as plt
 def detrend_dim(da, dim, deg=1):
-    # detrend along a single dimension
-    p = da.polyfit(dim=dim, deg=deg)
-    fit = xr.polyval(da[dim], p.polyfit_coefficients)
-    return da - fit
+  # detrend along a single dimension
+  p = da.polyfit(dim=dim, deg=deg)
+  fit = xr.polyval(da[dim], p.polyfit_coefficients)
+  return da - fit
 
 
 def standardize(x):
-    return (x - x.mean()) / x.std()
+  return (x - x.mean()) / x.std()
 
 
 def filplonlat(ds):
-    # To facilitate data subsetting
-    # print(da.attrs)
-    '''
-    print(
-        f'\n\nBefore flip, lon range is [{ds["lon"].min().data}, {ds["lon"].max().data}].'
-    )
-    ds["lon"] = ((ds["lon"] + 180) % 360) - 180
-    # Sort lons, so that subset operations end up being simpler.
-    ds = ds.sortby("lon")
-    '''
+  # To facilitate data subsetting
+  # print(da.attrs)
+  '''
+  print(
+      f'\n\nBefore flip, lon range is [{ds["lon"].min().data}, {ds["lon"].max().data}].'
+  )
+  ds["lon"] = ((ds["lon"] + 180) % 360) - 180
+  # Sort lons, so that subset operations end up being simpler.
+  ds = ds.sortby("lon")
+  '''
 
-    ds = ds.sortby("lat", ascending=True)
-    # print(ds.attrs)
-    print('\n\nAfter sorting lat values, ds["lat"] is:')
-    print(ds["lat"])
-    return ds
+  ds = ds.sortby("lat", ascending=True)
+  # print(ds.attrs)
+  print('\n\nAfter sorting lat values, ds["lat"] is:')
+  print(ds["lat"])
+  return ds
 
 
 def weightslat(ds):
-    deg2rad = np.pi/180.
-    clat = ds['lat'].astype(np.float64)
-    clat = np.sqrt(np.cos(deg2rad * clat))
-    print('\n\nclat:\n')
-    print(clat)
-    # Xarray will apply lat-based weights to all lons and timesteps automatically.
-    # This is called "broadcasting".
-    wds = ds
-    wds.attrs = ds.attrs
-    ds = clat * ds
-    wds.attrs['long_name'] = 'Wgt: '+wds.attrs['long_name']
-    return wds
+  deg2rad = np.pi/180.
+  clat = ds['lat'].astype(np.float64)
+  clat = np.sqrt(np.cos(deg2rad * clat))
+  print('\n\nclat:\n')
+  print(clat)
+  # Xarray will apply lat-based weights to all lons and timesteps automatically.
+  # This is called "broadcasting".
+  wds = ds
+  wds.attrs = ds.attrs
+  ds = clat * ds
+  wds.attrs['long_name'] = 'Wgt: '+wds.attrs['long_name']
+  return wds
 
 
 def SVD(L, R, N):
-    sst_ts = xMCA(L, R)
-    sst_ts.solver()
-    lp, rp = sst_ts.patterns(n=N)
-    lt, rt = sst_ts.expansionCoefs(n=N)
-    le, re, lphet, rphet = sst_ts.heterogeneousPatterns(
-        n=N, statistical_test=True)
-    frac = sst_ts.covFracs(n=N)
-    Frac = frac * 100.
-    Corr = xr.corr(lt, rt, dim='time')
-    return le, re, lt, rt, Frac, lphet, rphet, Corr
+  sst_ts = xMCA(L, R)
+  sst_ts.solver()
+  lp, rp = sst_ts.patterns(n=N)
+  lt, rt = sst_ts.expansionCoefs(n=N)
+  le, re, lphet, rphet = sst_ts.heterogeneousPatterns(
+      n=N, statistical_test=True)
+  frac = sst_ts.covFracs(n=N)
+  Frac = frac * 100.
+  Corr = xr.corr(lt, rt, dim='time')
+  return le, re, lt, rt, Frac, lphet, rphet, Corr
 
 
 def test_pn(le, ule, vle):
-    for i in range(3):
-        fig, ax1 = plt.subplots(3, figsize=(3, 5))
-        le[i].plot(ax=ax1[0], cmap='bwr')
-        ule[i].plot(ax=ax1[1], cmap='bwr')
-        vle[i].plot(ax=ax1[2], cmap='bwr')
+  for i in range(3):
+    fig, ax1 = plt.subplots(3, figsize=(3, 5))
+    le[i].plot(ax=ax1[0], cmap='bwr')
+    ule[i].plot(ax=ax1[1], cmap='bwr')
+    vle[i].plot(ax=ax1[2], cmap='bwr')
 
 
 def selYear(da, startYear, endYear):
-    startDate = da.sel(time=da.time.dt.year == startYear).time[0]
-    endDate = da.sel(time=da.time.dt.year == endYear).time[-1]
-    da = da.sel(time=slice(startDate, endDate))
-    return da
+  startDate = da.sel(time=da.time.dt.year == startYear).time[0]
+  endDate = da.sel(time=da.time.dt.year == endYear).time[-1]
+  da = da.sel(time=slice(startDate, endDate))
+  return da
 
 
 def selMon(da, Mon):
-    return da.sel(time=da.time.dt.month == Mon)
+  return da.sel(time=da.time.dt.month == Mon)
 
 
 def lsmask(ds, lsdir, label='ocean'):
-    with xr.open_dataset(lsdir) as f:
-        ds = f['mask'][0]
-    landsea = filplonlat(ds)
-    ds.coords['mask'] = (('lat', 'lon'), landsea.values)
-    if label == 'land':
-        ds = ds.where(ds.mask < 1)
-    elif label == 'ocean':
-        ds = ds.where(ds.mask > 0)
-    del ds['mask']
-    return ds
+  with xr.open_dataset(lsdir) as f:
+    da = f['mask'][0]
+  landsea = filplonlat(da)
+  ds.coords['mask'] = (('lat', 'lon'), landsea.values)
+  if label == 'land':
+    ds = ds.where(ds.mask < 1)
+  elif label == 'ocean':
+    ds = ds.where(ds.mask > 0)
+  del ds['mask']
+  return ds
 
 
 def month_to_season(xMon, season):
-    """ This function takes an xarray dataset containing monthly data spanning years and
-        returns a dataset with one sample per year, for a specified three-month season.
+  """ This function takes an xarray dataset containing monthly data spanning years and
+      returns a dataset with one sample per year, for a specified three-month season.
 
-        Time stamps are centered on the season, e.g. seasons='DJF' returns January timestamps.
+      Time stamps are centered on the season, e.g. seasons='DJF' returns January timestamps.
 
-        If a calculated season's timestamp falls outside the original range of monthly values, then the calculated mean
-        is dropped.  For example, if the monthly data's time range is [Jan-2000, Dec-2003] and the season is "DJF", the
-        seasonal mean computed from the single month of Dec-2003 is dropped.
-    """
-    startDate = xMon.time[0]
-    endDate = xMon.time[-1]
-    seasons_pd = {
-        'DJF': ('QS-DEC', 1),
-        'JFM': ('QS-JAN', 2),
-        'FMA': ('QS-FEB', 3),
-        'MAM': ('QS-MAR', 4),
-        'AMJ': ('QS-APR', 5),
-        'MJJ': ('QS-MAY', 6),
-        'JJA': ('QS-JUN', 7),
-        'JAS': ('QS-JUL', 8),
-        'ASO': ('QS-AUG', 9),
-        'SON': ('QS-SEP', 10),
-        'OND': ('QS-OCT', 11),
-        'NDJ': ('QS-NOV', 12)
-    }
-    try:
-        (season_pd, season_sel) = seasons_pd[season]
-    except KeyError:
-        raise ValueError("contributed: month_to_season: bad season: SEASON = " +
-                         season)
+      If a calculated season's timestamp falls outside the original range of monthly values, then the calculated mean
+      is dropped.  For example, if the monthly data's time range is [Jan-2000, Dec-2003] and the season is "DJF", the
+      seasonal mean computed from the single month of Dec-2003 is dropped.
+  """
+  startDate = xMon.time[0]
+  endDate = xMon.time[-1]
+  seasons_pd = {
+      'DJF': ('QS-DEC', 1),
+      'JFM': ('QS-JAN', 2),
+      'FMA': ('QS-FEB', 3),
+      'MAM': ('QS-MAR', 4),
+      'AMJ': ('QS-APR', 5),
+      'MJJ': ('QS-MAY', 6),
+      'JJA': ('QS-JUN', 7),
+      'JAS': ('QS-JUL', 8),
+      'ASO': ('QS-AUG', 9),
+      'SON': ('QS-SEP', 10),
+      'OND': ('QS-OCT', 11),
+      'NDJ': ('QS-NOV', 12)
+  }
+  try:
+    (season_pd, season_sel) = seasons_pd[season]
+  except KeyError:
+    raise ValueError("contributed: month_to_season: bad season: SEASON = " +
+                     season)
 
-    # Compute the three-month means, moving time labels ahead to the middle month.
-    month_offset = 'MS'
-    xSeasons = xMon.resample(time=season_pd, loffset=month_offset).mean()
+  # Compute the three-month means, moving time labels ahead to the middle month.
+  month_offset = 'MS'
+  xSeasons = xMon.resample(time=season_pd, loffset=month_offset).mean()
 
-    # Filter just the desired season, and trim to the desired time range.
-    xSea = xSeasons.sel(time=xSeasons.time.dt.month == season_sel)
-    xSea = xSea.sel(time=slice(startDate, endDate))
-    return xSea
+  # Filter just the desired season, and trim to the desired time range.
+  xSea = xSeasons.sel(time=xSeasons.time.dt.month == season_sel)
+  xSea = xSea.sel(time=slice(startDate, endDate))
+  return xSea
 
 
 # %%
@@ -174,13 +174,13 @@ fv = 'vwnd.mon.mean.1x1.nc'
 fls = 'lsmask.nc'
 
 with xr.open_dataset(path+fs) as f:
-    SST = weightslat(filplonlat(f["sst"]))
+  SST = weightslat(filplonlat(f["sst"]))
 with xr.open_dataset(path+fp) as f:
-    PRC = weightslat(filplonlat(f['precip']))
+  PRC = weightslat(filplonlat(f['precip']))
 with xr.open_dataset(path+fu) as f:
-    UWD = weightslat(filplonlat(f['uwnd']))
+  UWD = weightslat(filplonlat(f['uwnd']))
 with xr.open_dataset(path+fv) as f:
-    VWD = weightslat(filplonlat(f['vwnd']))
+  VWD = weightslat(filplonlat(f['vwnd']))
 
 N = 3
 
@@ -238,11 +238,11 @@ vle[1], vre[1], vlt[1], vrt[1] = -vle[1], -vre[1], -vlt[1], -vrt[1]
 test_pn(le, ule, vle)
 # %%
 s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
-u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
-v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
+u_out = [ule, ure, ult, urt, Fracu, rphetu, Corru]
+v_out = [vle, vre, vlt, vrt, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
 with open(path+'MCA/MCA_MAM_BIO_pickle.dat', 'wb') as f:
-    pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
+  pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 #
 # %%
 # note : for NIO ----------------------------------------------------------------------
@@ -278,11 +278,11 @@ test_pn(le, ule, vle)
 
 # %%
 s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
-u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
-v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
+u_out = [ule, ure, ult, urt, Fracu, rphetu, Corru]
+v_out = [vle, vre, vlt, vrt, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
 with open(path+'MCA/MCA_MAM_NIO_pickle.dat', 'wb') as f:
-    pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
+  pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
 # note : TIO
@@ -317,11 +317,11 @@ test_pn(le, ule, vle)
 
 # %%
 s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
-u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
-v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
+u_out = [ule, ure, ult, urt, Fracu, rphetu, Corru]
+v_out = [vle, vre, vlt, vrt, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
 with open(path+'MCA/MCA_MAM_TIO_pickle.dat', 'wb') as f:
-    pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
+  pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
 # note : SIO1
@@ -355,11 +355,11 @@ test_pn(le, ule, vle)
 
 # %%
 s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
-u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
-v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
+u_out = [ule, ure, ult, urt, Fracu, rphetu, Corru]
+v_out = [vle, vre, vlt, vrt, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
 with open(path+'MCA/MCA_MAM_SIO1_pickle.dat', 'wb') as f:
-    pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
+  pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
 # note : SIO2
@@ -393,11 +393,11 @@ test_pn(le, ule, vle)
 
 # %%
 s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
-u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
-v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
+u_out = [ule, ure, ult, urt, Fracu, rphetu, Corru]
+v_out = [vle, vre, vlt, vrt, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
 with open(path+'MCA/MCA_MAM_SIO2_pickle.dat', 'wb') as f:
-    pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
+  pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
 # note : SIO3
@@ -432,10 +432,10 @@ test_pn(le, ule, vle)
 
 # %%
 s_out = [le, re, lt, rt, Frac, lphet, rphet, Corr]
-u_out = [ule, ure, ult, urt, ulphet, Fracu, rphetu, Corru]
-v_out = [vle, vre, vlt, vrt, vlphet, Fracv, rphetv, Corrv]
+u_out = [ule, ure, ult, urt, Fracu, rphetu, Corru]
+v_out = [vle, vre, vlt, vrt, Fracv, rphetv, Corrv]
 svd_out = [s_out, u_out, v_out]
 with open(path+'MCA/MCA_MAM_SIO3_pickle.dat', 'wb') as f:
-    pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
+  pkl = pickle.dump([s_out, u_out, v_out], f, protocol=-1)
 
 # %%
