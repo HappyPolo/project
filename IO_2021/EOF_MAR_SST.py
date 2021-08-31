@@ -1,67 +1,21 @@
 '''
-                               |~~~~~~~|
-                               |       |
-                               |       |
-                               |       |
-                               |       |
-                               |       |
-    |~.\\\_\~~~~~~~~~~~~~~xx~~~         ~~~~~~~~~~~~~~~~~~~~~/_//;~|
-    |  \  o \_         ,XXXXX),                         _..-~ o /  |
-    |    ~~\  ~-.     XXXXX`)))),                 _.--~~   .-~~~   |
-     ~~~~~~~`\   ~\~~~XXX' _/ ';))     |~~~~~~..-~     _.-~ ~~~~~~~
-              `\   ~~--`_\~\, ;;;\)__.---.~~~      _.-~
-                ~-.       `:;;/;; \          _..-~~
-                   ~-._      `''        /-~-~
-                       `\              /  /
-                         |         ,   | |
-                          |  '        /  |
-                           \/;          |
-                            ;;          |
-                            `;   .       |
-                            |~~~-----.....|
-                           | \             \
-                          | /\~~--...__    |
-                          (|  `\       __-\|
-                          ||    \_   /~    |
-                          |)     \~-'      |
-                           |      | \      '
-                           |      |  \    :
-                            \     |  |    |
-                             |    )  (    )
-                              \  /;  /\  |
-                              |    |/   |
-                              |    |   |
-                               \  .'  ||
-                               |  |  | |
-                               (  | |  |
-                               |   \ \ |
-                               || o `.)|
-                               |`\\) |
-                               |       |
-                               |       |
-'''
-
-'''
 Author       : ChenKt
-Date         : 2021-08-25 19:27:22
+Date         : 2021-08-29 16:39:22
 LastEditors  : ChenKt
-LastEditTime : 2021-08-25 20:40:35
-FilePath     : /project/IO_2021/EOF_MAY_SST.py
-Aim          : 对MAY IO SST进行EOF并保存数据
-Mission      :
+LastEditTime : 2021-08-30 16:52:13
+FilePath     : /project/IO_2021/EOF_MAR_SST.py
+Aim          : 
+Mission      : 
 '''
-
 # %%
-
-
-
-
 from eofs.xarray import Eof
 import xarray as xr
 from xMCA import xMCA
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
+
+
 def standardize(x):
   return (x - x.mean()) / x.std()
 
@@ -165,15 +119,15 @@ LlatN = [30.,  30.,  15.,   0.,   0., -30.]  # 30.
 
 LlonL, LlonR = 50., 110.
 
-times = ['MAM', 'MAR', 'APR', 'MAY']
+times = ['MAM', 'MAR', 'APR', 'MAR']
 # %%
-# note: MAY
+# note: MAR
 SST = selYear(SST, 1982, 2021)
-sst_MAY = selMon(SST, 5)
+sst_MAR = selMon(SST, 3)
 # %%
 # note: BIO
 I = 0
-da = standardize(detrend_dim(sst_MAY, 'time'))
+da = standardize(detrend_dim(sst_MAR, 'time'))
 da = lsmask(da, path+fls).sel(
     lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
 da.name = SST.name
@@ -183,79 +137,19 @@ lp, le, frac = EOF(da, N)
 # test_ng(lp,le,N)
 
 # %%
-lp[0], le[0] = -lp[0], -le[0]
+# lp[0], le[0] = -lp[0], -le[0]
 lp[1], le[1] = -lp[1], -le[1]
-# lp[2], le[2] = -lp[2], -le[2]
+lp[2], le[2] = -lp[2], -le[2]
 test_ng(lp, le, N)
 # %%
-with open(path+'EOF/EOF_MAY_BIO_pickle.dat', 'wb') as f:
+with open(path+'EOF/EOF_MAR_BIO_pickle.dat', 'wb') as f:
   pkl = pickle.dump([lp, le, frac], f, protocol=-1)
 # %%
 # note: NIO
 I = 1
-da = standardize(detrend_dim(sst_MAY, 'time'))
+da = standardize(detrend_dim(sst_MAR, 'time'))
 da = lsmask(da, path+fls).sel(
     lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
-da.name = SST.name
-# %%
-lp, le, frac = EOF(da, N)
-
-# test_ng(lp, le, N)
-# %%
-lp[0], le[0] = -lp[0], -le[0]
-# lp[1], le[1] = -lp[1], -le[1]
-lp[2], le[2] = -lp[2], -le[2]
-test_ng(lp, le, N)
-# %%
-with open(path+'EOF/EOF_MAY_NIO_pickle.dat', 'wb') as f:
-  pkl = pickle.dump([lp, le, frac], f, protocol=-1)
-# %%
-# note: TIO
-I = 2
-da = standardize(detrend_dim(sst_MAY, 'time'))
-da = lsmask(da, path+fls).sel(
-    lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
-
-da.name = SST.name
-# %%
-lp, le, frac = EOF(da, N)
-
-# test_ng(lp, le, N)
-# %%
-lp[0], le[0] = -lp[0], -le[0]
-lp[1], le[1] = -lp[1], -le[1]
-lp[2], le[2] = -lp[2], -le[2]
-test_ng(lp, le, N)
-# %%
-with open(path+'EOF/EOF_MAY_TIO_pickle.dat', 'wb') as f:
-  pkl = pickle.dump([lp, le, frac], f, protocol=-1)
-# %%
-# note: SIO1
-I = 3
-da = standardize(detrend_dim(sst_MAY, 'time'))
-da = lsmask(da, path+fls).sel(
-    lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
-
-da.name = SST.name
-# %%
-lp, le, frac = EOF(da, N)
-
-# test_ng(lp, le, N)
-# %%
-lp[0], le[0] = -lp[0], -le[0]
-# lp[1], le[1] = -lp[1], -le[1]
-lp[2], le[2] = -lp[2], -le[2]
-test_ng(lp, le, N)
-# %%
-with open(path+'EOF/EOF_MAY_SIO1_pickle.dat', 'wb') as f:
-  pkl = pickle.dump([lp, le, frac], f, protocol=-1)
-# %%
-# note: SIO2
-I = 4
-da = standardize(detrend_dim(sst_MAY, 'time'))
-da = lsmask(da, path+fls).sel(
-    lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
-
 da.name = SST.name
 # %%
 lp, le, frac = EOF(da, N)
@@ -267,12 +161,72 @@ lp[1], le[1] = -lp[1], -le[1]
 # lp[2], le[2] = -lp[2], -le[2]
 test_ng(lp, le, N)
 # %%
-with open(path+'EOF/EOF_MAY_SIO2_pickle.dat', 'wb') as f:
+with open(path+'EOF/EOF_MAR_NIO_pickle.dat', 'wb') as f:
+  pkl = pickle.dump([lp, le, frac], f, protocol=-1)
+# %%
+# note: TIO
+I = 2
+da = standardize(detrend_dim(sst_MAR, 'time'))
+da = lsmask(da, path+fls).sel(
+    lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
+
+da.name = SST.name
+# %%
+lp, le, frac = EOF(da, N)
+
+# test_ng(lp, le, N)
+# %%
+# lp[0], le[0] = -lp[0], -le[0]
+# lp[1], le[1] = -lp[1], -le[1]
+# lp[2], le[2] = -lp[2], -le[2]
+test_ng(lp, le, N)
+# %%
+with open(path+'EOF/EOF_MAR_TIO_pickle.dat', 'wb') as f:
+  pkl = pickle.dump([lp, le, frac], f, protocol=-1)
+# %%
+# note: SIO1
+I = 3
+da = standardize(detrend_dim(sst_MAR, 'time'))
+da = lsmask(da, path+fls).sel(
+    lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
+
+da.name = SST.name
+# %%
+lp, le, frac = EOF(da, N)
+
+# test_ng(lp, le, N)
+# %%
+# lp[0], le[0] = -lp[0], -le[0]
+lp[1], le[1] = -lp[1], -le[1]
+# lp[2], le[2] = -lp[2], -le[2]
+test_ng(lp, le, N)
+# %%
+with open(path+'EOF/EOF_MAR_SIO1_pickle.dat', 'wb') as f:
+  pkl = pickle.dump([lp, le, frac], f, protocol=-1)
+# %%
+# note: SIO2
+I = 4
+da = standardize(detrend_dim(sst_MAR, 'time'))
+da = lsmask(da, path+fls).sel(
+    lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
+
+da.name = SST.name
+# %%
+lp, le, frac = EOF(da, N)
+
+# test_ng(lp, le, N)
+# %%
+# lp[0], le[0] = -lp[0], -le[0]
+# lp[1], le[1] = -lp[1], -le[1]
+lp[2], le[2] = -lp[2], -le[2]
+test_ng(lp, le, N)
+# %%
+with open(path+'EOF/EOF_MAR_SIO2_pickle.dat', 'wb') as f:
   pkl = pickle.dump([lp, le, frac], f, protocol=-1)
 # %%
 # note: SIO3
 I = 5
-da = standardize(detrend_dim(sst_MAY, 'time'))
+da = standardize(detrend_dim(sst_MAR, 'time'))
 da = lsmask(da, path+fls).sel(
     lat=slice(LlatS[I], LlatN[I]), lon=slice(LlonL, LlonR))
 
@@ -287,5 +241,5 @@ lp[1], le[1] = -lp[1], -le[1]
 lp[2], le[2] = -lp[2], -le[2]
 test_ng(lp, le, N)
 # %%
-with open(path+'EOF/EOF_MAY_SIO3_pickle.dat', 'wb') as f:
+with open(path+'EOF/EOF_MAR_SIO3_pickle.dat', 'wb') as f:
   pkl = pickle.dump([lp, le, frac], f, protocol=-1)
